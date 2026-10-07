@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duellen i Birken 2027</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0e1b2c;
+    --navy-2: #16283f;
+    --snow: #f5f7fa;
+    --ink: #13202f;
+    --muted: #5d6b7c;
+    --line: #dde3ea;
+    --red: #c8102e;
+    --accent: #f5b301; /* nøytral aksentfarge (vs, Stem, Avgi din stemme) */
+    --accent-ink: #8a5f00; /* mørkere gull for tekst på lys bakgrunn */
+    --a: #c8102e;   /* farge løper A */
+    --b: #1f6fd1;   /* farge løper B */
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: var(--snow);
+    line-height: 1.6;
+  }
+  h1, h2, h3 { font-family: "Archivo Black", Impact, sans-serif; line-height: 1.1; margin: 0 0 .5em; letter-spacing: -.01em; }
+  h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+  img { max-width: 100%; display: block; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding-inline: 20px; }
+  section { padding-block: 88px; }
+  .eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: .78rem; font-weight: 700; color: var(--accent-ink); margin-bottom: .6em; }
+
+  /* Navigasjon */
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(14,27,44,.92); backdrop-filter: blur(8px);
+  }
+  nav .wrap { display: flex; gap: 22px; align-items: center; height: 56px; overflow-x: auto; }
+  nav a { color: #cfd8e3; text-decoration: none; font-weight: 600; font-size: .9rem; white-space: nowrap; }
+  nav a:hover { color: #fff; }
+  nav .logo { color: #fff; font-family: "Archivo Black", sans-serif; margin-right: auto; }
+  nav .stem { background: var(--accent); color: var(--navy); padding: 6px 14px; border-radius: 99px; }
+  @media (max-width: 640px) {
+    nav .wrap { gap: 16px; justify-content: center; }
+    nav .logo, nav .hide-sm { display: none; }
+  }
+
+  /* Hero */
+  .hero {
+    position: relative; color: #fff; text-align: center;
+    background:
+      linear-gradient(180deg, rgba(14,27,44,.55), rgba(14,27,44,.92)),
+      url("images/hero.jpg") center/cover no-repeat,
+      linear-gradient(160deg, #24476f, var(--navy));
+    padding-block: 120px 110px;
+  }
+  .hero h1 { font-size: clamp(2.6rem, 8vw, 5.2rem); margin-bottom: .2em; }
+  .hero h1 .vs { color: var(--accent); }
+  .hero p.lead { font-size: 1.2rem; color: #d7e0ea; max-width: 620px; margin: 0 auto 2.2em; }
+  .countdown { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .countdown div { background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); border-radius: 12px; padding: 14px 18px; min-width: 86px; }
+  .countdown b { display: block; font-family: "Archivo Black", sans-serif; font-size: 2rem; }
+  .countdown span { font-size: .75rem; text-transform: uppercase; letter-spacing: .1em; color: #b9c6d4; }
+  .hero .cta { display: inline-block; margin-top: 2.4em; background: var(--accent); color: var(--navy); padding: 14px 28px; border-radius: 999px; font-weight: 700; text-decoration: none; }
+  .hero .cta:hover { filter: brightness(1.1); }
+
+  /* Historie / tidslinje */
+  .timeline { position: relative; margin-top: 40px; }
+  .timeline::before { content: ""; position: absolute; left: 11px; top: 6px; bottom: 6px; width: 2px; background: var(--line); }
+  .event { position: relative; padding-left: 44px; margin-bottom: 34px; }
+  .event::before { content: ""; position: absolute; left: 4px; top: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--accent); border: 3px solid var(--snow); box-shadow: 0 0 0 2px var(--accent); }
+  .event .when { font-weight: 700; color: var(--accent-ink); font-size: .9rem; }
+  .event h3 { font-family: Inter, sans-serif; font-weight: 700; font-size: 1.2rem; margin: .1em 0 .3em; }
+  .event p { margin: 0; color: var(--muted); }
+  .event p + p { margin-top: .8em; }
+  .event img { margin-top: 12px; border-radius: 10px; max-height: 320px; object-fit: cover; }
+
+  /* Deltakerprofil (egen seksjon per løper) */
+  .profile { position: relative; overflow: hidden; }
+  .profile.pa { background: linear-gradient(180deg, #fff 0%, #fdf1f3 100%); }
+  .profile.pb { background: linear-gradient(180deg, #fff 0%, #eef4fc 100%); }
+  .profile .bignum { position: absolute; top: 20px; right: -10px; font-family: "Archivo Black", sans-serif; font-size: clamp(10rem, 28vw, 20rem); line-height: 1; color: var(--c); opacity: .07; pointer-events: none; }
+  .profile .bignum.word { font-size: clamp(5rem, 17vw, 12rem); top: 30px; } /* mindre når det står et helt ord */
+  .profile .eyebrow { color: var(--c); }
+  .intro { display: grid; grid-template-columns: 260px 1fr; gap: 40px; align-items: center; position: relative; }
+  .profile.pb .intro { grid-template-columns: 1fr 260px; }
+  .profile.pb .intro .portrait { order: 2; }
+  @media (max-width: 720px) { .intro, .profile.pb .intro { grid-template-columns: 1fr; } .profile.pb .intro .portrait { order: 0; } .portrait { width: 75%; margin-inline: auto; } }
+  .portrait { aspect-ratio: 3/4; border-radius: 18px; overflow: hidden; background: linear-gradient(135deg, var(--c), var(--navy)); display: grid; place-items: center; color: rgba(255,255,255,.85); font-family: "Archivo Black", sans-serif; font-size: 5rem; box-shadow: 14px 14px 0 color-mix(in srgb, var(--c) 25%, transparent); max-width: 300px; }
+  .portrait img { width: 100%; height: 100%; object-fit: cover; }
+  .intro h2 { font-size: clamp(2.2rem, 6vw, 3.6rem); }
+  .intro .quote { font-size: 1.25rem; font-style: italic; color: var(--muted); margin: 0 0 1.2em; }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px; }
+  .facts span { background: #fff; border: 1px solid color-mix(in srgb, var(--c) 30%, var(--line)); color: var(--ink); border-radius: 99px; padding: 6px 14px; font-size: .88rem; font-weight: 600; }
+  .facts span b { color: var(--c); }
+  .story { columns: 2 320px; column-gap: 40px; margin-top: 48px; color: #334255; position: relative; }
+  .story p { margin: 0 0 1em; break-inside: avoid; }
+  .story p:first-child::first-letter { float: left; font-family: "Archivo Black", sans-serif; font-size: 3.4rem; line-height: .9; padding: 4px 8px 0 0; color: var(--c); }
+
+  /* Bildekollasj */
+  .collage { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); grid-auto-rows: 160px; grid-auto-flow: dense; gap: 12px; margin-top: 44px; position: relative; }
+  .collage figure { margin: 0; position: relative; border-radius: 12px; overflow: hidden; cursor: zoom-in; background: color-mix(in srgb, var(--c) 14%, #e9edf2); transition: transform .2s; }
+  .collage figure:hover { transform: scale(1.02) rotate(var(--tilt, 0deg)); z-index: 1; box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+  .collage figure.wide { grid-column: span 2; }
+  .collage figure.tall { grid-row: span 2; }
+  .collage figure.big { grid-column: span 2; grid-row: span 2; }
+  @media (max-width: 420px) { .collage { grid-template-columns: 1fr 1fr; grid-auto-rows: 130px; } }
+  .collage img { width: 100%; height: 100%; object-fit: cover; }
+  .collage figcaption { position: absolute; inset: auto 0 0 0; padding: 22px 10px 8px; font-size: .8rem; font-weight: 600; color: #fff; background: linear-gradient(transparent, rgba(0,0,0,.65)); }
+  .collage .ph { width: 100%; height: 100%; display: grid; place-items: center; text-align: center; padding: 10px; color: var(--c); font-size: .8rem; font-weight: 600; border: 2px dashed color-mix(in srgb, var(--c) 40%, transparent); border-radius: 12px; }
+
+  /* Lysboks */
+  .lightbox { position: fixed; inset: 0; z-index: 50; background: rgba(8,14,24,.92); display: grid; place-items: center; padding: 24px; }
+  .lightbox img { max-height: 82vh; max-width: 100%; border-radius: 10px; }
+  .lightbox p { color: #e8eef5; text-align: center; margin: 12px 0 0; }
+  .lightbox button { position: absolute; background: rgba(255,255,255,.12); color: #fff; border: 0; font-size: 1.6rem; width: 48px; height: 48px; border-radius: 50%; cursor: pointer; }
+  .lightbox .x { top: calc(16px + env(safe-area-inset-top, 0px)); right: 16px; }
+  .lightbox .prev { left: 12px; top: 50%; } .lightbox .next { right: 12px; top: 50%; }
+
+  /* Utfordrere */
+  .dark { background: var(--navy); color: #e8eef5; }
+  .dark .eyebrow { color: var(--accent); }
+  .fighters { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 28px; margin-top: 40px; }
+  .card { background: var(--navy-2); border-radius: var(--radius); overflow: hidden; border-top: 5px solid var(--c); }
+  .card .photo { aspect-ratio: 4/3; background: linear-gradient(135deg, var(--c), #0b1522); display: grid; place-items: center; font-family: "Archivo Black", sans-serif; font-size: 4rem; color: rgba(255,255,255,.85); }
+  .card .photo:has(img) { aspect-ratio: 3/4; position: relative; } /* samme format som bildene (3:4) */
+  .card .photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: top; } /* beskjærer nedenfra */
+  .card .body { padding: 24px; }
+  .card h3 { font-size: 1.7rem; margin-bottom: .1em; }
+  .card .tag { color: #9fb0c3; font-style: italic; margin: 0 0 1.2em; }
+  .stat { margin-bottom: 12px; }
+  .stat .lbl { display: flex; justify-content: space-between; font-size: .85rem; color: #b9c6d4; }
+  .stat .bar { height: 8px; background: rgba(255,255,255,.1); border-radius: 99px; overflow: hidden; margin-top: 4px; }
+  .stat .bar i { display: block; height: 100%; background: var(--c); border-radius: 99px; }
+  .lists { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+  .lists h4 { margin: 0 0 6px; font-size: .8rem; text-transform: uppercase; letter-spacing: .1em; }
+  .lists ul { margin: 0; padding-left: 1.1em; font-size: .92rem; color: #d2dbe5; }
+  .lists li { margin-bottom: 4px; }
+  .plus h4 { color: #5fd38d; } .minus h4 { color: #ff7b8a; }
+  @media (max-width: 420px) { .lists { grid-template-columns: 1fr; } }
+
+  /* Veddemålet */
+  .bet { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 32px; }
+  .bet .box { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 24px; }
+  .bet .box .icon { font-size: 2rem; }
+  .bet .box h3 { font-family: Inter, sans-serif; font-weight: 700; font-size: 1.1rem; margin: .4em 0 .3em; }
+  .bet .box p { margin: 0; color: var(--muted); }
+
+  /* Avstemning */
+  .vote-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; margin-top: 32px; }
+  @media (max-width: 800px) { .vote-wrap { grid-template-columns: 1fr; } }
+  form { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+  .choices label { cursor: pointer; }
+  .choices input { position: absolute; opacity: 0; }
+  .choices .opt { display: block; text-align: center; padding: 18px 10px; border: 2px solid var(--line); border-radius: 12px; font-weight: 700; transition: .15s; }
+  .choices input:checked + .opt { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, white); color: var(--c); }
+  .choices input:focus-visible + .opt { outline: 3px solid var(--c); outline-offset: 2px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: 4px; }
+  .field input, .field textarea { width: 100%; font: inherit; padding: 11px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fbfcfd; }
+  .field textarea { min-height: 96px; resize: vertical; }
+  button[type=submit] { width: 100%; font: inherit; font-weight: 700; background: var(--navy); color: #fff; border: 0; padding: 14px; border-radius: 10px; cursor: pointer; }
+  button[type=submit]:hover { background: var(--red); }
+  button[disabled] { opacity: .6; cursor: wait; }
+  .msg { margin-top: 12px; font-weight: 600; min-height: 1.4em; }
+  .msg.ok { color: #1c8a4a; } .msg.err { color: var(--red); }
+
+  .scoreboard { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; }
+  .split { display: flex; height: 46px; border-radius: 10px; overflow: hidden; background: var(--line); margin: 10px 0 8px; }
+  .split div { display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; transition: width .6s ease; min-width: 0; white-space: nowrap; overflow: hidden; }
+  .split .sa { background: var(--a); } .split .sb { background: var(--b); }
+  .legend { display: flex; justify-content: space-between; font-size: .9rem; color: var(--muted); }
+  .total { margin-top: 6px; color: var(--muted); font-size: .9rem; }
+
+  .comments { margin-top: 48px; }
+  .filter { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .filter button { font: inherit; font-size: .88rem; font-weight: 600; padding: 7px 14px; border-radius: 99px; border: 1px solid var(--line); background: #fff; cursor: pointer; }
+  .filter button.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .clist { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .comment { background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--c); border-radius: 10px; padding: 14px 16px; }
+  .comment .top { display: flex; justify-content: space-between; gap: 8px; font-size: .85rem; }
+  .comment .who { font-weight: 700; }
+  .comment .pick { color: var(--c); font-weight: 600; }
+  .comment p { margin: 6px 0 0; color: #334255; overflow-wrap: anywhere; }
+  .comment time { display: block; margin-top: 8px; font-size: .75rem; color: var(--muted); }
+  .empty { color: var(--muted); font-style: italic; }
+  .demo-note { background: #fff6d6; border: 1px solid #f0d77a; border-radius: 10px; padding: 10px 14px; font-size: .88rem; margin-top: 18px; }
+
+  footer { background: var(--navy); color: #9fb0c3; text-align: center; padding-block: 40px; font-size: .9rem; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="#top">Birken 2027</a>
+    <a href="#historien" class="hide-sm">Historien</a>
+    <a href="#lop-a" data-name="a">Løper A</a>
+    <a href="#lop-b" data-name="b">Løper B</a>
+    <a href="#utfordrerne" class="hide-sm">Styrker</a>
+    <a href="#veddemalet" class="hide-sm">Veddemålet</a>
+    <a href="#stem" class="stem">Stem</a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<header class="hero" id="top">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--accent)">Birkebeinerrennet · Rena → Lillehammer · 54 km</div>
+    <h1><span data-name="a">MARI BALKE FJELLANG</span> <span class="vs">vs</span> <span data-name="b">THOMAS NGUYEN</span></h1>
+    <p class="lead">To Sopra Sterianere, ett veddemål og 54 kilometer gjennom fjellene. Hvem kommer først over målstreken på Birkebeineren skistadion?</p>
+    <div class="countdown" id="countdown" aria-label="Nedtelling til start">
+      <div><b id="cd-d">–</b><span>dager</span></div>
+      <div><b id="cd-h">–</b><span>timer</span></div>
+      <div><b id="cd-m">–</b><span>min</span></div>
+    </div>
+    <br>
+    <a class="cta" href="#stem">Avgi din stemme ↓</a>
+  </div>
+</header>
+
+<!-- ============ HISTORIEN ============ -->
+<section id="historien">
+  <div class="wrap">
+    <div class="eyebrow">Historien</div>
+    <h2>Hvordan det hele startet</h2>
+    <p style="max-width:680px;color:var(--muted)">På en vakker kveld på takterrassen til Sopra Steria sommeren 2024 
+      var hele gjengen samlet. Mari begynte å skryte hemningsløst av skiferdighetene sine, men fortalte samtidig at 
+      hennes store våte drøm var å fullføre Birkebeinerrennet. Thomas, som på sin side aldri hadde gått på ski før, 
+      tenkte ikke noe særlig over det. Lite visste Thomas at denne kvelden skulle påvirke ham for resten av livet.</p>
+
+    <div class="timeline">
+      <div class="event">
+        <div class="when">Desember 2025</div>
+        <h3>Starten på Birkebeinereventyret</h3>
+        <p>Det var en vanlig dag på kontoret, en onsdag morgen, med snus i kjeften og kaffeånde til hundre og helvete.</p>
+
+<p>Thomas og Hans-Olav satt ved siden av hverandre og jazza om et eller annet tull, før Hans-Olav plutselig skjøt ut: «Jeg er keen på å slutte å snuse.»</p>
+
+<p>Thomas, så ydmyk og søt som han er, var selvfølgelig villig til å slutte sammen med ham. Tomas Tellier og Mari overhørte samtalen og utfordret Thomas: Hvis han ikke klarte å holde seg snusfri ut måneden, måtte han melde seg på Birken sammen med undertegnede.</p>
+
+<p>Thomas holdt seg uten snus i fire timer.</p>
+
+<p>Påfølgende aften måtte han melde seg på Birken 2026.</p>
+        <!-- Legg til bilde: <img src="images/kantina.jpg" alt="Beskrivelse"> -->
+      </div>
+      <div class="event">
+        <div class="when">Februar 2026</div>
+        <h3>Skitur til Kikuthytta</h3>
+        <p>Thomas, som aldri hadde gått på ski før, måtte selvfølgelig stille på den årlige skituren til Kikuthytta. </p>
+        <p>Mens alle andre koste seg på skitur fra Holmenkollen til Kikuthytta, drakk Jägermeister og fyllekjørte gjennom Oslomarka, gikk stakkars Thomas alene i mørket – uten noen form for skiferdigheter, sans for balanse eller evne til å kjøre en nedoverbakke.
+        </p>
+        <p>Da Thomas endelig kom fram til Kikuthytta, var alle andre allerede på plass, gode og varme. Mari, med en kaffe Baileys i hånda, kom bort til Thomas, så på ham og sa:</p>
+        <p>"Det tok sin tid..."</p>
+        <p>Thomas gråt alene på rommet den natten.</p>
+      </div>
+      <div class="event">
+        <div class="when">Mars 2026</div>
+        <h3>Birkebeinerrennet 2026 - the turn around</h3>
+        <p>En vakker, iskald marsmorgen går Thomas, Mari og Axel opp til stadion for å rekke shuttlebussen til Rena. Mari, som faktisk hadde sjekket smøretips og -forhold, yapper som aldri før om hvor gode skiene hennes kommer til å være. Hun har tross alt droppet smørningen og heller gått for det bredt anbefalte tipset - FELLEski! Thomas, stolt som han er, la sine felleski igjen i Lillehammer. 
+        </p>
+        <p>I den andre enden av skalaen står Thomas, som kvelden før måtte lære seg å smøre ski av Herman Bue, med "maraton"-voks som kostet halve månedslønnen (hvis man trekker ifra sertifiseringer). Thomas var dømt til å feile... tenkte han selv...</p>
+        <p>Snøforholdene under Birkebeinerrennet dette året var heller ikke mye å skryte av. Med null feste og tidvis enorme kladder under skiene slet Thomas med å holde følge med Maris profesjonelt preparerte felleski.
+        </p>
+        <p>Likevel bet Thomas tennene sammen og kjempet seg hele veien til mål, hvor han og Mari krysset mållinjen samtidig.</p>
+        <p>Snille og søte Thomas var lykkelig. Han hadde klart å fullføre noe han aldri trodde han skulle klare.</p>
+        <p>Lite visste han at Mari, bare noen meter unna, sendte ham et dødelig blikk.</p>
+        <p>Et blikk som skulle hjemsøke ham resten av livet.</p>
+      </div>
+      <div class="event">
+        <div class="when">Mai 2026</div>
+        <h3>Utfordringen</h3>
+        <p>En vakker kveld på Madeira, med duften av saltvann, sangria, øl og vin innabords, satt Thomas, Helene og Mari og pratet om alt mulig i livet. Jazzen var god.</p>
+        <p>Så kom Birkebeinerrennet opp som tema.</p>
+        <p>Ydmyke Thomas snakket ikke stort om rennet...</p>
+        <p>Mari, derimot...</p>
+        <p>Den tidligere toppidrettsutøveren Mari Balke Fjellang fra Lyn Skiklubb klarte ikke å legge Birken 2026 bak seg. Hun utfordret Thomas til konkurranse i 2027.</p>
+        <p>Snille, søte Thomas, som vet at han ikke har en sjanse mot store, slemme Mari, klarte selvfølgelig ikke å si nei …</p>
+        <p>Helene var målløs i bakgrunnen... Hva hun tenkte, vet man inte...</p>
+      </div>
+      <div class="event">
+        <div class="when">Mars 2027</div>
+        <h3>Birkebeinerrennet 2027</h3>
+        <p>Middelmådige og snille Thomas mot topptrente skiløper Mari. Hvem kommer over fjellene først?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LØPER A – PROFIL ============ -->
+<section id="lop-a" class="profile pa" style="--c:var(--a)">
+  <div class="bignum word" aria-hidden="true">Mari</div>
+  <div class="wrap">
+    <div class="intro">
+      <div class="portrait"><img src="images/lop-a.jpg" alt="" onerror="this.replaceWith(document.createTextNode('A'))"></div>
+      <div>
+        <div class="eyebrow">Møt topptrente, uslåelige og beste</div>
+        <h2 data-name="a">MARI BALKE FJELLANG</h2>
+        <p class="quote">"Jeg er uslåelig med Lyn-pannebånd..."</p>
+        <div class="facts">
+          <span><b>Alder:</b> 26</span>
+          <span><b>Bor:</b> Oslo</span>
+          <span><b>Antall Birken:</b> 1</span>
+          <span><b>Favorittdrink:</b> Corona med limebåt</span>
+          <span><b>Mål:</b> Knuse Thomas</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="story">
+      <p>Ski er livet for Mari. Hun er født og oppvokst på Tåsen og betrakter Nordmarka, Lyn Skiklubb og Ullevålseter stue som sin eneste familie. Alle som ikke har gått skirenn på Svalbard, blir i Maris øyne betraktet som svenske.</p>
+      <p>Med sin fantastiske evne til å kombinere langrenn med øldrikking sier Mari selv at hun er født gæren og sprek.</p>
+      <p>For Mari er 54 kilometer på langrenn nærmest ingenting. Med daglige skiturer på tre mil og oppover på Beitostølen som oppladning til Birken 2026 og 2027, mener hun selv at dette kommer til å bli enkelt.</p>
+      <p>Grunnen til at Mari er så sprek, er at hun jobber deltid som Strava-jockey. Med lange og raske skiturer er det nok av gamle menn som er villige til å betale for at Mari skal gå fort på ski.</p>
+      <p>Stem på Mari hvis du tror at selvtillit, naturlig skitalent og Lyn Skiklubb kan føre henne til seier!</p>
+      <p>Quote Mari: "Thomas kaller det rivalisering. Jeg kaller det barneskirenn."</p>
+    </div>
+
+    <!-- Bildene til løper A legges inn i galleryA nederst i fila -->
+    <div class="collage" data-gallery="a"></div>
+  </div>
+</section>
+
+<!-- ============ LØPER B – PROFIL ============ -->
+<section id="lop-b" class="profile pb" style="--c:var(--b)">
+  <div class="bignum word" aria-hidden="true" style="right:auto;left:-10px">Thomas</div>
+  <div class="wrap">
+    <div class="intro">
+      <div class="portrait"><img src="images/lop-b.jpg" alt="" onerror="this.replaceWith(document.createTextNode('B'))"></div>
+      <div>
+        <div class="eyebrow">Møt snille, ydmyke og herligste</div>
+        <h2 data-name="b">Løper B</h2>
+        <p class="quote">"Tror jeg må kaste av meg skjorta, jeg nå!"</p>
+        <div class="facts">
+          <span><b>Alder:</b> 27</span>
+          <span><b>Bor:</b> Oslo</span>
+          <span><b>Antall Birken:</b> 1</span>
+          <span><b>Favorittdrink:</b> Virgin Vodka Bull</span>
+          <span><b>Mål:</b> Rekke å være med på fellesmiddagen!</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="story">
+      <p>Thomas er en konkurranse-mann. Han sier at han liker å <i>ha det vondt</i>, til tross for at det har blitt noen DNFs på konkurranser og løp det siste året. Nesten så han skulle endret tatovering til "Seek <del style="text-decoration-color: red;">dis</del>comfort." </p>
+      <p>Likevel har Thomas en psyke utenom det vanlige, og han har en egen evne til å pushe seg selv. Blant merittene hans finner vi mange ultra-maraton, backyard ultra, luftige klatre- og randonee-turer og småløp som maraton/halvmaraton. </p>
+      <p>Thomas sin ski-historie begynte tidlig, som unggutt i Lier Skiklubb. Han hadde ski som var for lange, fordi "Du kommer jo til å vokse så mye". Det gjorde han ikke. Treningsutbyttet ble som resultat desto større. </p>
+      <p>Etterhvert som Thomas ble eldre, fant han interessen for å inngå veddemål, særlig med kollegaer. Han hater ikke å utfordre andre, enten det gjelder å fullføre Lillestrøm Maraton mens han snuser (hele veien), gå Birken med trestaver, eller en klassisk nugget-rulett på Hot Temper. </p>
+      <p>Thomas er også en habil utøver på <i>fylla</i>, oftest sett med tre-fire drinker samtidig. Selv  mener han at sjarmen ligger i <i>balansen</i>, i skjæringspunktet mellom ekstremsport og grøftefyll. </p>
+      <p>Quote Thomas: «Jeg skal uppe Birken fra i fjor, i år blir det ikke bare 6, men 10 Smirnoff Ice i sekken!»</p>
+    </div>
+
+    <!-- Bildene til løper B legges inn i galleryB nederst i fila -->
+    <div class="collage" data-gallery="b"></div>
+  </div>
+</section>
+
+<!-- ============ UTFORDRERNE ============ -->
+<section id="utfordrerne" class="dark">
+  <div class="wrap">
+    <div class="eyebrow">Utfordrerne</div>
+    <h2>Styrker og svakheter</h2>
+    <div class="fighters">
+
+      <!-- Løper A -->
+      <article class="card" style="--c:var(--a)">
+        <div class="photo"><img src="images/lop-a.jpg" alt="" onerror="this.replaceWith(document.createTextNode('A'))"></div>
+        <div class="body">
+          <h3 data-name="a">Løper A</h3>
+          <p class="tag">«Thomas løper halvmaraton på under tre timer. Jeg løper  halvmaraton på under to timer. Ergo er jeg sprekere enn ham !!»</p>
+          <div class="stat"><div class="lbl"><span>Utholdenhet</span><span>4/10</span></div><div class="bar"><i style="width:40%"></i></div></div>
+          <div class="stat"><div class="lbl"><span>Teknikk</span><span>10/10</span></div><div class="bar"><i style="width:100%"></i></div></div>
+          <div class="stat"><div class="lbl"><span>Smøring</span><span>10/10</span></div><div class="bar"><i style="width:100%"></i></div></div>
+          <div class="stat"><div class="lbl"><span>Psyke</span><span>4/10</span></div><div class="bar"><i style="width:40%"></i></div></div>
+                    <div class="stat"><div class="lbl"><span>Alkoholtoleranse</span><span>8/10</span></div><div class="bar"><i style="width:80%"></i></div></div>
+          <div class="lists">
+            <div class="plus"><h4>Styrker</h4><ul><li>Kan drikke øl en hel kveld</li><li>Fancy nytt skitøy fra Craft</li><li>Naturlig sprek</li><li>Gikk for Lyn Skiklubb</li></ul></div>
+            <div class="minus"><h4>Svakheter</h4><ul><li>Er dame</li><li>Vodka Bull, og det er natta</li><li>Lett distrahert på Sjusjøen</li><li>Lever fortsatt på Lyn Skiklubb</li></ul></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Løper B -->
+      <article class="card" style="--c:var(--b)">
+        <div class="photo"><img src="images/lop-b.jpg" alt="" onerror="this.replaceWith(document.createTextNode('B'))"></div>
+        <div class="body">
+          <h3 data-name="b">Løper B</h3>
+          <p class="tag">«Må slå Mari, må slå Mari. Det sitter i hue, kompis! Seek discomfort, always seek discomfort.. Smirnoff ICE!?! HVEM TOK BAILEYS'en?????»</p>
+          <div class="stat"><div class="lbl"><span>Utholdenhet</span><span>9/10</span></div><div class="bar"><i style="width:90%"></i></div></div>
+          <div class="stat"><div class="lbl"><span>Teknikk</span><span>1/10</span></div><div class="bar"><i style="width:10%"></i></div></div>
+          <div class="stat"><div class="lbl"><span>Smøring</span><span>1/10</span></div><div class="bar"><i style="width:10%"></i></div></div>
+          <div class="stat"><div class="lbl"><span>Psyke</span><span>10/10</span></div><div class="bar"><i style="width:100%"></i></div></div>
+          <div class="stat"><div class="lbl"><span>Alkoholtoleranse</span><span>9/10</span></div><div class="bar"><i style="width:90%"></i></div></div>
+          <div class="lists">
+            <div class="plus"><h4>Styrker</h4><ul><li>Kan gå i kjelleren</li><li>Lår av stål</li><li>Topp Coaching fra Martine Engebretsen</li><li>Går i baris</li></ul></div>
+            <div class="minus"><h4>Svakheter</h4><ul><li>Udiagnosert ADHD</li><li>Bruker alle pengene sine på byen</li><li>Frykt for å være edru i skiløypa</li><li>Må gå i baris</li></ul></div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ VEDDEMÅLET ============ -->
+<section id="veddemalet">
+  <div class="wrap">
+    <div class="eyebrow">Veddemålet</div>
+    <h2>Hva står på spill?</h2>
+    <div class="bet">
+      <div class="box"><div class="icon">🏆</div><h3>Premien</h3><p>Taperen må spandere en middag til en verdi av kr 3 000,-. Og selvfølgelig skal passenger princess Helene Bjørnsen også være med på middagen – helt kostnadsfritt, naturligvis.</p></div>
+      <div class="box"><div class="icon">😬</div><h3>Straffen</h3><p>Penger er ikke problemet. Den virkelige straffen handler om heder og ære.
+
+For Thomas, som verken kan vintersport eller vinteraktiviteter, er det egentlig bare stas å være med. Han er fornøyd uansett hvordan det går.
+
+Mari, derimot …</p></div>
+      <div class="box"><div class="icon">📏</div><h3>Reglene</h3><p>Offisiell sluttid teller. Ikke fullført = tap. Ingen start = tap. Ingen unnskyldninger om smøring.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STEM ============ -->
+<section id="stem" style="background:#eaf0f6">
+  <div class="wrap">
+    <div class="eyebrow">Din tur</div>
+    <h2>Hvem kommer først i mål?</h2>
+
+    <div class="vote-wrap">
+      <form id="vote-form" novalidate>
+        <div class="choices" role="radiogroup" aria-label="Velg løper">
+          <label style="--c:var(--a)"><input type="radio" name="choice" value="a" required><span class="opt" data-name="a">Løper A</span></label>
+          <label style="--c:var(--b)"><input type="radio" name="choice" value="b"><span class="opt" data-name="b">Løper B</span></label>
+        </div>
+        <div class="field">
+          <label for="f-name">Navnet ditt</label>
+          <input id="f-name" name="name" maxlength="60" required autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="f-comment">Kommentar (valgfritt)</label>
+          <textarea id="f-comment" name="comment" maxlength="500" placeholder="Hvorfor tror du det?"></textarea>
+        </div>
+        <button type="submit">Send stemme</button>
+        <div class="msg" id="msg" role="status"></div>
+      </form>
+
+      <div class="scoreboard">
+        <h3 style="font-family:Inter,sans-serif;font-weight:700;font-size:1.1rem">Stillingen akkurat nå</h3>
+        <div class="split" aria-hidden="true">
+          <div class="sa" id="bar-a" style="width:50%"></div>
+          <div class="sb" id="bar-b" style="width:50%"></div>
+        </div>
+        <div class="legend"><span data-name="a">Løper A</span><span data-name="b">Løper B</span></div>
+        <div class="total" id="total">Laster stemmer …</div>
+        <div class="demo-note" id="demo-note" hidden>
+          <b>Demomodus:</b> Supabase er ikke koblet til ennå, så stemmene lagres bare i denne nettleseren. Følg README.md for å koble til databasen.
+        </div>
+      </div>
+    </div>
+
+    <div class="comments">
+      <h3 style="font-family:Inter,sans-serif;font-weight:700;font-size:1.2rem">Hvem stemte på hvem?</h3>
+      <div class="filter" id="filter">
+        <button data-f="all" class="on">Alle</button>
+        <button data-f="a" data-name="a">Løper A</button>
+        <button data-f="b" data-name="b">Løper B</button>
+      </div>
+      <div class="clist" id="clist"></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Topptrente Mari VS snille Thomas · Birkebeinerrennet 2027</div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ================================================================
+   INNSTILLINGER – endre disse
+   ================================================================ */
+const CONFIG = {
+  nameA: "Mari Balke Fjellang",                // ditt navn
+  nameB: "Thomas Nguyen",                // kollegaens navn
+  raceStart: "2027-03-20T08:00:00+01:00", // sjekk offisiell dato/starttid på birkebeiner.no
+  supabaseUrl: "https://bicjfrzxogcqmviwzrzv.supabase.co", // f.eks. "https://abcdxyz.supabase.co"
+  supabaseKey: ""                   // "anon public"-nøkkelen fra Supabase
+};
+/* ================================================================
+   BILDEKOLLASJ – legg bildene i images/a/ og images/b/
+   size: "" (vanlig), "wide" (bred), "tall" (høy) eller "big" (stor)
+   pos: (valgfri) hvilken del av bildet som vises, f.eks. "center top" eller "center 20%"
+   Legg til så mange linjer du vil.
+   ================================================================ */
+const galleryA = [
+  { src: "images/a/1.jpg", caption: "Alltid på tur med Lyn-pannebånd", size: "big" },
+  { src: "images/a/2.jpg", caption: "Mari i sitt naturlige element", size: "tall" },
+  { src: "images/a/3.jpg", caption: "Mari, med Lyn-pannebånd, coacher Helene og Axel", size: "big" },
+  { src: "images/a/4.jpg", caption: "Mari uten Lyn-pannebånd", size: "tall" },
+  { src: "images/a/5.jpg", caption: "Lett som en lek", size: "big" },
+  { src: "images/a/6.jpg", caption: "Skulle trodd Mari og Thomas ikke var bitre fiender...", size: "big"},
+];
+const galleryB = [
+  { src: "images/b/1.jpg", caption: "Birken i baris", size: "big" },
+  { src: "images/b/2.jpg", caption: "Uslåelig kombo", size: "tall" },
+  { src: "images/b/3.jpg", caption: "Må lufte utstyret iblant", size: "tall" },
+  { src: "images/b/4.jpg", caption: "Favorittdrinken - gjerne 4 av de", size: "big" },
+  { src: "images/b/5.jpg", caption: "Sa noen .... RT!", size: "tall" },
+  { src: "images/b/6.jpg", caption: "Ække redd for litt skrubbsår", size: "big" },
+  { src: "images/b/7.jpg", caption: "Baris... IGJEN", size: "tall" },
+];
+/* ================================================================ */
+
+const NAMES = { a: CONFIG.nameA, b: CONFIG.nameB };
+document.querySelectorAll("[data-name]").forEach(el => { el.textContent = NAMES[el.dataset.name]; });
+document.title = `${CONFIG.nameA} vs ${CONFIG.nameB} – Birken 2027`;
+
+// Bildekollasj + lysboks
+function buildGallery(el, items) {
+  items.forEach((it, i) => {
+    const fig = document.createElement("figure");
+    if (it.size) fig.className = it.size;
+    fig.style.setProperty("--tilt", (i % 2 ? 1 : -1) + "deg");
+    const img = document.createElement("img");
+    img.src = it.src; img.alt = it.caption || ""; img.loading = "lazy";
+    if (it.pos) img.style.objectPosition = it.pos; // hvilken del av bildet som vises
+    img.onerror = () => {
+      const ph = document.createElement("div"); ph.className = "ph";
+      ph.textContent = "Bilde mangler: " + it.src;
+      img.replaceWith(ph); fig.style.cursor = "default"; fig.dataset.missing = "1";
+    };
+    fig.append(img);
+    if (it.caption) { const c = document.createElement("figcaption"); c.textContent = it.caption; fig.append(c); }
+    fig.addEventListener("click", () => {
+      if (fig.dataset.missing) return;
+      const ok = items.filter((_, j) => !el.children[j].dataset.missing);
+      openLightbox(ok, ok.indexOf(it));
+    });
+    el.append(fig);
+  });
+}
+buildGallery(document.querySelector('[data-gallery="a"]'), galleryA);
+buildGallery(document.querySelector('[data-gallery="b"]'), galleryB);
+
+function openLightbox(items, idx) {
+  const box = document.createElement("div");
+  box.className = "lightbox"; box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true");
+  const inner = document.createElement("div");
+  const img = document.createElement("img"); const cap = document.createElement("p");
+  inner.append(img, cap);
+  const mk = (cls, txt, label) => { const b = document.createElement("button"); b.className = cls; b.textContent = txt; b.setAttribute("aria-label", label); return b; };
+  const x = mk("x", "×", "Lukk"), prev = mk("prev", "‹", "Forrige"), next = mk("next", "›", "Neste");
+  box.append(inner, x);
+  if (items.length > 1) box.append(prev, next);
+  const show = () => { img.src = items[idx].src; img.alt = items[idx].caption || ""; cap.textContent = items[idx].caption || ""; };
+  const step = d => { idx = (idx + d + items.length) % items.length; show(); };
+  const close = () => { box.remove(); document.removeEventListener("keydown", onKey); };
+  const onKey = e => { if (e.key === "Escape") close(); if (e.key === "ArrowLeft") step(-1); if (e.key === "ArrowRight") step(1); };
+  x.onclick = close; prev.onclick = () => step(-1); next.onclick = () => step(1);
+  box.addEventListener("click", e => { if (e.target === box) close(); });
+  document.addEventListener("keydown", onKey);
+  show(); document.body.append(box); x.focus();
+}
+
+// Nedtelling
+(function tick() {
+  const ms = new Date(CONFIG.raceStart) - new Date();
+  const d = Math.max(0, ms);
+  document.getElementById("cd-d").textContent = Math.floor(d / 864e5);
+  document.getElementById("cd-h").textContent = Math.floor(d / 36e5) % 24;
+  document.getElementById("cd-m").textContent = Math.floor(d / 6e4) % 60;
+  setTimeout(tick, 30000);
+})();
+
+// Lagring: Supabase hvis satt opp, ellers localStorage (demo)
+const useDb = !!(CONFIG.supabaseUrl && CONFIG.supabaseKey && window.supabase);
+const sb = useDb ? window.supabase.createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey) : null;
+if (!useDb) document.getElementById("demo-note").hidden = false;
+
+const store = {
+  async list() {
+    if (sb) {
+      const { data, error } = await sb.from("votes").select("name, choice, comment, created_at").order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    }
+    try { return JSON.parse(localStorage.getItem("birken-votes") || "[]"); } catch { return []; }
+  },
+  async add(v) {
+    if (sb) {
+      const { error } = await sb.from("votes").insert(v);
+      if (error) throw error;
+      return;
+    }
+    const all = await this.list();
+    all.unshift({ ...v, created_at: new Date().toISOString() });
+    try { localStorage.setItem("birken-votes", JSON.stringify(all)); } catch {}
+  }
+};
+
+let votes = [];
+let filter = "all";
+
+function render() {
+  const a = votes.filter(v => v.choice === "a").length;
+  const b = votes.filter(v => v.choice === "b").length;
+  const t = a + b;
+  const pa = t ? Math.round(a / t * 100) : 50;
+  const barA = document.getElementById("bar-a"), barB = document.getElementById("bar-b");
+  barA.style.width = pa + "%"; barB.style.width = (100 - pa) + "%";
+  barA.textContent = t && a ? pa + " %" : ""; barB.textContent = t && b ? (100 - pa) + " %" : "";
+  document.getElementById("total").textContent = t
+    ? `${t} stemmer totalt: ${a} på ${NAMES.a}, ${b} på ${NAMES.b}`
+    : "Ingen stemmer ennå. Bli den første!";
+
+  const list = document.getElementById("clist");
+  list.replaceChildren();
+  const shown = votes.filter(v => filter === "all" || v.choice === filter);
+  if (!shown.length) {
+    const p = document.createElement("p"); p.className = "empty"; p.textContent = "Ingen stemmer her ennå.";
+    list.append(p); return;
+  }
+  for (const v of shown) {
+    const el = document.createElement("div");
+    el.className = "comment";
+    el.style.setProperty("--c", v.choice === "a" ? "var(--a)" : "var(--b)");
+    const top = document.createElement("div"); top.className = "top";
+    const who = document.createElement("span"); who.className = "who"; who.textContent = v.name;
+    const pick = document.createElement("span"); pick.className = "pick"; pick.textContent = "→ " + NAMES[v.choice];
+    top.append(who, pick); el.append(top);
+    if (v.comment) { const p = document.createElement("p"); p.textContent = v.comment; el.append(p); }
+    const time = document.createElement("time");
+    time.textContent = new Date(v.created_at).toLocaleDateString("no-NO", { day: "numeric", month: "long", year: "numeric" });
+    el.append(time);
+    list.append(el);
+  }
+}
+
+async function load() {
+  try { votes = await store.list(); render(); }
+  catch (e) { document.getElementById("total").textContent = "Klarte ikke å hente stemmene."; console.error(e); }
+}
+
+document.getElementById("filter").addEventListener("click", e => {
+  const btn = e.target.closest("button"); if (!btn) return;
+  filter = btn.dataset.f;
+  document.querySelectorAll("#filter button").forEach(b => b.classList.toggle("on", b === btn));
+  render();
+});
+
+document.getElementById("vote-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const form = e.target, msg = document.getElementById("msg"), btn = form.querySelector("button");
+  const choice = form.choice.value;
+  const name = form.name.value.trim();
+  const comment = form.comment.value.trim();
+  msg.className = "msg";
+  if (!choice) { msg.textContent = "Velg hvem du tror vinner."; msg.classList.add("err"); return; }
+  if (!name) { msg.textContent = "Skriv inn navnet ditt."; msg.classList.add("err"); return; }
+  btn.disabled = true;
+  try {
+    await store.add({ name, choice, comment: comment || null });
+    msg.textContent = `Takk, ${name}! Stemmen din på ${NAMES[choice]} er registrert.`;
+    msg.classList.add("ok");
+    form.reset();
+    await load();
+  } catch (err) {
+    console.error(err);
+    msg.textContent = "Noe gikk galt. Prøv igjen.";
+    msg.classList.add("err");
+  } finally { btn.disabled = false; }
+});
+
+load();
+</script>
+</body>
+</html>
